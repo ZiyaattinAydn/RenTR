@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rentr"
+version = "1.0.0rc0"
+description = "Ren'Py projects için Turkish-first localization assistant"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Ziyaattin Aydın" },
+]
+dependencies = [
+  "httpx>=0.28,<1",
+  "rich>=14,<15",
+  "typer>=0.16,<1",
+]
+
+[project.optional-dependencies]
+desktop = [
+  "pyside6>=6.8,<7",
+]
+
+[project.scripts]
+rentr = "rentr.cli:app"
+rentr-gui = "rentr.desktop.app:run"
+
+[dependency-groups]
+dev = [
+  "hypothesis>=6,<7",
+  "mypy>=1.17,<2",
+  "pytest>=8,<10",
+  "ruff>=0.12,<1",
+]
+packaging = [
+  "pyinstaller>=6.15,<7",
+]
+desktop = [
+  "pyside6>=6.8,<7",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rentr"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests", "scripts"]

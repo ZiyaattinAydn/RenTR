@@ -1,0 +1,27 @@
+RenTR Phase 2.6 — Parallel Model Lanes + Scalable Memory
+
+Amaç:
+- Phase 2.5.4 model-grouped batching kazanımını korurken aynı model içindeki isteklerin
+  kontrollü biçimde paralel gönderilebilmesini sağlamak.
+- Full-game koşusunda Translation Memory büyüdükçe her satırda O(N) fuzzy tarama yapılmasını
+  TranslateGemma hibrit yolunda devre dışı bırakmak.
+
+Değişiklikler:
+- pilot-translate: --parallel-workers (1..8)
+- TranslationEngine.translate_selected: parallel_workers desteği
+- Base / repair / judge hâlâ ayrı model evreleri; farklı modeller aynı anda karıştırılmıyor.
+- TranslationMemory paylaşılan worker thread'leri için RLock + check_same_thread=False ile
+  güvenli hale getirildi.
+- TranslateGemma pilot yolunda fuzzy-memory suggestion üretimi kapatıldı. Bu adapter zaten
+  suggestion alanını promptta kullanmıyordu; kalite davranışı değişmeden büyüyen SQLite
+  belleğinde gereksiz tarama kaldırıldı.
+- Çıktı JSON'una parallel_workers metriği eklendi.
+
+Yerel doğrulama:
+- compileall: PASS
+- tests/test_memory.py + tests/test_pipeline.py: 44 PASS
+- full pytest: yeni değişikliklere ait testler PASS; çalışma snapshot'ında patch öncesinden
+  var olan test_translate_estimate_never_calls_provider beklenti farkı nedeniyle 1 mevcut
+  failure bulunuyor (baseline snapshot'ta da aynı failure mevcut).
+- Ruff/Mypy bu Linux container'da dependency indirme ağı olmadığı için çalıştırılamadı;
+  Windows scripts/verify.py son doğrulamadır.

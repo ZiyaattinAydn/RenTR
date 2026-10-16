@@ -1,0 +1,27 @@
+RenTR Phase 2.5.3 / Hybrid v3.1 — Repair Hallucination Gate
+
+Amaç:
+- Teknik olarak bozuk BASE yüzünden REPAIR adayının otomatik kabul edilmesini tamamen kaldırmak.
+- Repair çıktısının kaynak cümleyi aşıp önceki/sonraki bağlamı devam ettirmesini fail-closed yakalamak.
+
+Değişiklikler:
+1. suspicious_output_expansion hard-risk
+   - >=40 görünür karakterli kaynaklarda, hedef >1.85x ve +45 karakterden fazla büyürse hard-risk.
+2. adjacent_context_name_leak hard-risk
+   - Kaynakta olmayan fakat previous/next source'ta geçen özel isim repair çıktısına sızarsa hard-risk.
+3. BASE teknik olarak geçersizse REPAIR artık asla otomatik kabul edilmiyor.
+   - hard-risk varsa doğrudan REJECT.
+   - judge yoksa REJECT.
+   - judge varsa yalnız REPAIR kararı ve >=0.82 confidence ile kabul.
+   - judge BASE/REJECT derse veya güven düşükse REJECT.
+4. BASE hard-risk + REPAIR temiz olduğunda judge mevcutsa selector atlanmıyor.
+5. Translation Memory'e yalnız final seçimi geçen aday yazılıyor.
+
+Regression:
+- Kritik v3 hallucination örneği (Axel/context continuation) için test eklendi.
+- Teknik-invalid BASE + temiz REPAIR'in judge onayı olmadan geçememesi test edildi.
+
+Container doğrulaması:
+- pytest: 266 passed
+- compileall: passed
+- Ruff/Mypy bu container'da indirilemedi; Windows scripts/verify.py ile doğrulanmalı.

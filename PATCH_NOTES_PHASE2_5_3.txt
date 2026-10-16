@@ -1,0 +1,15 @@
+RenTR Phase 2.5.3 - Repair Semantic Fidelity Gate
+
+Changed:
+- Technical BASE failure + technically valid REPAIR now requires a semantic judge gate.
+- REPAIR must receive decision=repair with confidence >= 0.85.
+- Any reject/base/low-confidence verdict fails closed because the BASE candidate is unusable.
+- Judge outage in this recovery path fails closed.
+- No judge provider in this recovery path also fails closed.
+- Adds source_only_fidelity_required audit hint to the judge request.
+
+Validation in reconstruction environment:
+- compileall: PASS
+- targeted tests/test_pipeline.py: 27 passed
+- Full historical reconstruction reached 260 passes with one unrelated stale pretest CLI expectation
+  (passthrough_units field), so Windows scripts/verify.py remains the authoritative full-suite check.

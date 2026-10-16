@@ -1,0 +1,15 @@
+schema_version = 1
+
+[project]
+name = "RenTR Demo"
+
+[provider]
+type = "openai-compatible"
+model = "MODEL_ADINI_YAZ"
+base_url = "https://SAĞLAYICI_ADRESİ/v1"
+api_key_env = "RENTR_API_KEY"
+
+[paths]
+glossary = "glossary.json"
+characters = "characters.json"
+memory = ".rentr/memory.sqlite3"

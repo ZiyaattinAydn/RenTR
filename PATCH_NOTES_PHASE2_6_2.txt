@@ -1,0 +1,35 @@
+RenTR Phase 2.6.2 — Base Inference Trim + Safe Base Reuse
+Date: 2026-08-25
+
+Purpose
+- Keep the stable Hybrid v3/Fidelity quality path.
+- Keep production settings at --parallel-workers 1 --llm-batch-size 1.
+- Reduce TranslateGemma per-line overhead without native multi-line batching.
+- Avoid repeating the same context-free TranslateGemma base inference when the
+  exact protected source text repeats.
+
+Changes
+1. TranslateGemma single-line prompt is shorter and keeps the important rules:
+   faithful meaning, natural Turkish, informal register, profanity/sexual
+   explicitness, no censorship/euphemism, no invented details, token fidelity.
+2. Ordinary VN lines use a 1024-token base context window; unusually long lines
+   fall back to 2048.
+3. Base num_predict is dynamic (96..512) to cap runaway generation while leaving
+   long-line headroom.
+4. TranslateGemma exposes a base_reuse_key. TranslationEngine can reuse only the
+   raw context-free BASE response for identical source/language requests.
+5. Final output is NOT deduplicated. Every occurrence still gets its own risk
+   analysis, scene context, Aya repair and Qwen3 judge decision where required.
+6. New metrics: base_provider_calls and base_reused_units.
+
+Safety
+- Reuse is enabled only for providers that explicitly declare the capability.
+- Reuse is disabled when parallel_workers > 1.
+- Failed provider attempts are never cached for reuse.
+- Native LLM batch remains available experimentally but production should use
+  --llm-batch-size 1 because the ORS benchmark was slower and less stable at 5.
+
+Local evidence in build container
+- python compileall: PASS
+- targeted pytest (local_models + pipeline): 57/57 PASS
+- Ruff/mypy unavailable offline; Windows scripts/verify.py remains authoritative.

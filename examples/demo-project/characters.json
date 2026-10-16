@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "characters": [
+    {
+      "speaker": "eileen",
+      "display_name": "Eileen",
+      "address_style": "sen",
+      "traits": ["sıcak", "doğrudan"],
+      "notes": "Doğal ve kısa cümleler kurar."
+    }
+  ]
+}

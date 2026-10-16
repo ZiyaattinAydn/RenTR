@@ -1,0 +1,63 @@
+RenTR Phase 2.5.4 — Hybrid v3.2 Semantic Coverage + Token Prompt Hardening
+Date: 2026-08-26
+
+Why this patch exists
+---------------------
+Hybrid v3.1 reduced the deterministic ORS 100-line benchmark from 23 rejects/failures in
+Hybrid v2 to 11. The remaining benchmark exposed two systemic gaps:
+
+1. Model-visible placeholder layout metadata such as
+   __RENTR_0000__:attached_left,attached_right
+   was being echoed into translations. The model should never have seen those annotations.
+2. Several semantically wrong but technically valid Turkish outputs escaped because the risk
+   analyzer did not recognize a small set of recurring English idiom/short-line traps.
+
+Changes
+-------
+- TranslateGemma now sees __RENTR_XXXX__ placeholders only as opaque literal tokens.
+  Layout annotations are no longer included in its prompt.
+- Aya semantic-repair payload no longer includes placeholder_contract/layout metadata.
+  The repair prompt explicitly forbids attached_left/source_suffix-style annotations.
+- Qwen3 judge prompt now warns about recurring traps: holding my own, what about you,
+  here you go, unfinished what the...?!, and unnatural standalone Turkish "lanet".
+- Fixed a deterministic semantic detector bug where the old regex `am\w*` treated Turkish
+  `ama` as if it preserved the English explicit noun `pussy`.
+- `Cum in my pussy!` can now accept natural Turkish inside-ejaculation phrasing such as
+  `İçime boşal!` without requiring an unnatural repeated anatomy noun.
+- Standalone sexual `Sex` may no longer silently become abstract `Cinsellik`.
+- New hard-risk checks cover benchmark-proven failure shapes:
+  * holding my own -> kendi başımayım
+  * here you go -> işte o / işte bu kadar
+  * what about you -> sen ne düşünüyorsun
+  * About me? -> invented "ister misin" expansion
+  * It's about time -> artık yeter
+  * meet with -> tanışmak
+  * I care -> bana göre
+  * incomplete What the...?! -> invented ne yapıyorsun?!
+  * malformed Turkish forms observed in output (benimden / püsün / pussymi)
+  * punctuation artifacts after leading Ren'Py controls
+  * unnatural "Ah, lanet!" treatment of profane fuck
+  * miss being with -> reflexive `olmamı özle...` error
+- `slut` guardrail now explicitly rejects non-sexual softening such as `arsız` alone.
+
+Replay observation
+------------------
+Running only the new deterministic analyzer over the already-generated v3.1 final outputs
+flags 14 previously accepted benchmark rows for another repair/reject path. This is a replay
+observation, not a claim that v3.2 has already produced 14 corrected translations.
+
+Safety boundary
+---------------
+This patch does NOT guess where an internal Ren'Py {w} pause should move after Turkish word
+order changes. Internal wait/stutter controls remain fail-closed. The first goal here is to
+remove the prompt metadata leak that was encouraging placeholder corruption. If the same
+inline-wait cases still fail after the v3.2 benchmark, they need a dedicated deterministic
+stutter-control strategy rather than increasingly permissive token restoration.
+
+Container checks
+----------------
+- python compileall on changed source: PASS
+- targeted pytest: tests/test_semantic_repair.py + tests/test_local_models.py: 46 passed
+- full reconstructed-workspace pytest was not claimed because this patch workspace does not
+  contain the complete RenTR module tree (for example rentr.domain). Run scripts/verify.py in
+  the real Windows repo after applying the patch.

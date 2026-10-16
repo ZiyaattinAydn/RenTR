@@ -1,0 +1,26 @@
+# This fixture is original RenTR test data, not copied game content.
+translate turkish quiet_hall_1a2b3c4d:
+
+    # "The hall was silent."
+    ""
+
+translate turkish escaped_2a3b4c5d:
+
+    # eileen "She said, \"Wait.\"\nFolder: C:\\Games\\RenTR; protected \%."
+    eileen ""
+
+translate turkish split_3a4b5c6d:
+
+    # eileen "This answer has two beats."
+    eileen "Bu yanıtın"
+    eileen "iki bölümü var."
+
+translate turkish backtick_4a5b6c7d:
+
+    # `A narrator can use backticks.`
+    ``
+
+translate turkish strings:
+
+    old r"Literal \n stays protected as \%."
+    new ""

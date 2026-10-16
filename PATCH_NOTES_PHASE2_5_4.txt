@@ -1,0 +1,15 @@
+RenTR Phase 2.5.4 — HYBRID SPEED
+
+Amaç: kalite hattını sökmeden Ollama model değiştirme maliyetini düşürmek.
+
+Dosyalar:
+- src/rentr/pipeline.py: model-grouped hybrid chunk scheduling
+- src/rentr/local_models.py: keep_alive, prediction caps, compact/non-thinking judge
+- src/rentr/cli.py: --hybrid-batch-size + elapsed/units-per-minute telemetry
+- tests/test_pipeline.py
+- tests/test_local_models.py
+
+Önerilen ilk doğrulama:
+  uv run --group desktop python scripts\verify.py
+
+Sonra 10 satırlık hız smoke'u. 100 satır koşusu ancak süreyi gördükten sonra.

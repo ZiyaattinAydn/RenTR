@@ -1,0 +1,40 @@
+RenTR Phase 2.5.2 — Hybrid v3 Quality Hardening
+24 Ağustos 2026
+
+Base: kullanıcının Phase 2.5.1 Candidate Selector kurulu repo durumu.
+
+Değişiklik özeti
+- TranslateGemma uncensored + placeholder-layout direct prompt.
+- Aya semantic repair için source-specific guardrails.
+- Qwen3 candidate judge için explicitness-neutral seçim politikası.
+- pussy/cock/anal sex/negation/register risk sinyalleri.
+- Uydurma püs/pussymi benzeri pseudo-Türkçe explicit biçimleri hard-risk.
+- Yalnız eksik absolute prefix/suffix TEXT_TAG tokenlarında deterministic salvage.
+- Internal/data-bearing/moved controls fail-closed kalır.
+
+Container doğrulaması
+- compileall: PASS
+- pytest: 261/261 PASS
+- Ruff/mypy bu containerda kurulu olmadığı için Windows scripts/verify.py ile mühürlenmeli.
+
+Kurulum
+ZIP içeriğini C:\Users\ziyaa\RenTR üzerine çıkar ve mevcut dosyaların üzerine yaz.
+
+Windows doğrulama
+cd C:\Users\ziyaa\RenTR
+$env:TEMP = "C:\Users\ziyaa\RenTR\.rentr-temp"
+$env:TMP  = "C:\Users\ziyaa\RenTR\.rentr-temp"
+uv run --group desktop python scripts\verify.py
+
+Doğrulama geçerse yeni 10-line smoke:
+uv run rentr pilot-translate `
+  "C:\Users\ziyaa\Downloads\OurRedString-v15.1.1-pc-RenTR-Work\game\tl\turkish" `
+  --workspace "C:\Users\ziyaa\Downloads\OurRedString-v15.1.1-pc-RenTR-Work" `
+  --ollama-model "translategemma:12b" `
+  --repair-model "aya-expanse:8b" `
+  --judge-model "qwen3:8b" `
+  --limit 10 `
+  --quality balanced `
+  --output "C:\Users\ziyaa\Downloads\OurRedString-v15.1.1-pc-RenTR-Work\.rentr\pilot-results-10-hybrid-v3.json"
+
+10 smoke iyi görünürse aynı komutu --limit 100 ve pilot-results-100-hybrid-v3.json ile tekrar et.

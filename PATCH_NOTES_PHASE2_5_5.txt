@@ -1,0 +1,33 @@
+RenTR Phase 2.5.5 — Boundary Token Recovery
+
+Amaç
+- Hybrid speed kazanımını koru.
+- Terminal Ren'Py timing/control tokenlarının arkasına modelin eklediği noktalama yüzünden
+  gereksiz repair/judge çağrısını önle.
+- Özellikle `...-{w=0.5}{nw}` sınıfındaki satırları LLM repair'e göndermeden deterministik
+  olarak kurtar.
+
+Değişen dosyalar
+- src/rentr/protection.py
+- tests/test_protection.py
+- tests/test_pipeline.py
+
+Güvenlik sınırı
+- Sadece mutlak satır sonundaki TEXT_TAG placeholder kümesi için çalışır.
+- Placeholder'ların kendisi mevcut, doğru sırada ve bitişik olmalıdır.
+- Internal token konumu tahmin edilmez.
+- Interpolation / printf / escape tokenları bu kurtarmaya dahil edilmez.
+- Timing suffix bir kesik tireden sonra geliyorsa modelin tokenlardan sonra eklediği noktalama
+  atılır; diğer güvenli suffix durumlarında noktalama token kümesinin önüne taşınır.
+
+Beklenen ORS etkisi
+- Önceki smoke testte base çeviri anlamsal olarak kullanılabilirken
+  `__RENTR_0000____RENTR_0001__.` yüzünden teknik QC fail olmuştu.
+- Bu patch aynı yapıyı `...-{w=0.5}{nw}` olarak deterministik kurtarır.
+- Böylece Aya'nın context'ten Axel/dört ayak gibi içerik ekleme fırsatı doğmadan base kabul edilir.
+- Repair ve judge çağrısı yapılmadığı için bu sınıfta hem güvenlik hem hız iyileşir.
+
+Container kontrolleri
+- compileall: geçti
+- hedefli pytest: 69/69 geçti
+- Windows scripts/verify.py yine nihai doğrulamadır.

@@ -1,0 +1,68 @@
+RenTR Phase 2.6 — Final Quality Architecture
+Date: 2026-08-26
+
+Primary goal
+------------
+Remove the remaining systematic Hybrid v3.1 benchmark failure classes before in-game testing.
+
+1) Deterministic Ren'Py stutter renderer
+---------------------------------------
+Patterns such as:
+  y--{w=0.5}you
+  d--{w=0.5}don't
+  n--{w=0.5}naked
+  B--{w=0.5}but
+  Y-{w=0.3}yes
+are no longer sent to the LLM with an opaque wait placeholder embedded inside an English word.
+
+RenTR now:
+  a. normalizes the English stutter for translation,
+  b. translates the semantic text,
+  c. locates the Turkish semantic anchor,
+  d. deterministically re-renders the original Ren'Py wait tag and hesitation pattern.
+
+Ordinary/internal Ren'Py controls that are not recognized as this narrow stutter pattern remain
+under the existing fail-closed protection rules.
+
+2) Short semantic ambiguity gate
+--------------------------------
+New deterministic hard-risk checks cover benchmark escapes such as:
+  I care -> Bana göre
+  It's about time -> Artık yeter
+  About me? -> Benden bahsetmek ister misin?
+  Meet with Holly -> Holly ile tanışın
+  hold my own -> kendi başımayım
+  standalone Sex -> Cinsellik
+
+The checks route these cases through repair/selection instead of accepting risk=0 output.
+
+3) Explicit-language corrections
+---------------------------------
+- Fixed a detector bug where Turkish conjunction "ama" could accidentally satisfy the "am"
+  anatomy check.
+- "Cum in my pussy" may naturally become "İçime boşal"; Turkish does not need an awkward noun
+  repetition when the sexual location is grammatically unambiguous.
+- TranslateGemma and Aya prompts receive source-specific semantic guardrails earlier.
+- Explicitness remains a fidelity criterion, not a reason to censor.
+
+4) Stronger selector semantics
+------------------------------
+Qwen3 is explicitly instructed to derive source meaning first, then compare candidates.
+Known idiom failure modes such as "hold my own", "pull strings" and "it's about time" are called
+out as semantic traps. Surface similarity must not beat meaning.
+
+5) Boundary punctuation QC
+--------------------------
+A new deterministic check rejects stray punctuation inserted immediately after a leading Ren'Py
+control tag, e.g.:
+  {image=...}This... -> {image=...}:Bu...
+This routes the candidate to repair instead of silently accepting the artifact.
+
+Local verification performed in the reconstruction environment
+--------------------------------------------------------------
+- compileall: PASS
+- focused regression suite covering pipeline, stutter, semantic repair and quality: 58 PASS
+
+The reconstruction environment was assembled from historical patch archives and is not an exact
+copy of the user's Windows checkout. Run scripts\\verify.py on the real repository before the next
+benchmark; that result is authoritative.

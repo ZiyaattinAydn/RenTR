@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "version": "1.0.0",
+  "terms": [
+    {
+      "source": "Save",
+      "target": "Kaydet",
+      "case_sensitive": false,
+      "notes": "Arayüz eylemi olarak kullanıldığında"
+    },
+    {
+      "source": "Load",
+      "target": "Yükle",
+      "case_sensitive": false,
+      "notes": "Kayıt yükleme eylemi"
+    }
+  ]
+}

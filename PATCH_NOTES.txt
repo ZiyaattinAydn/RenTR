@@ -1,0 +1,9 @@
+RenTR Phase 2.5.2 Hybrid v3 CLI compatibility fix
+
+Reason:
+- Hybrid v3 quality patch updates pipeline/local model interfaces but intentionally does not add speed-phase interfaces.
+- A partially applied speed-phase cli.py was still calling memory_suggestions_enabled, hybrid_batch_size, parallel_workers, llm_batch_size and reading base_batch_* report fields.
+- This patch restores cli.py to the Phase 2.5.1 candidate-selector interface, which is compatible with Hybrid v3 quality pipeline.
+
+Apply over C:\Users\ziyaa\RenTR and overwrite src\rentr\cli.py.
+Then run scripts\verify.py.

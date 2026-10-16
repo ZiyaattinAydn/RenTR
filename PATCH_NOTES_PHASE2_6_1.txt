@@ -1,0 +1,55 @@
+RenTR Phase 2.6.1 — Native Base LLM Batch Inference
+Date: 2026-08-25
+
+Goal
+----
+Reduce the dominant TranslateGemma first-pass cost by translating several independent
+units in one Ollama /api/chat request instead of paying one request/prompt setup per unit.
+
+What changed
+------------
+- Added optional BatchTranslationProvider protocol.
+- TranslateGemma Ollama adapter can translate a tuple of units in one structured JSON batch.
+- Each batch item carries an immutable unit id and its own placeholder contract.
+- Output must contain exactly the same ids, exactly once, in the same order.
+- Pipeline exposes --llm-batch-size (pilot default 8, max 16).
+- Batch mode is enabled only when fuzzy translation-memory suggestions are disabled.
+  This preserves the old sequential memory-feedback semantics for providers that use them.
+- Malformed/failed batch responses automatically fall back to the existing single-unit
+  provider path, so one bad batch does not lose the chunk.
+- Audit output now records base_batch_calls, base_batch_units and
+  base_batch_fallback_units.
+- Repair and judge stages remain unchanged in this patch. Base translation dominates the
+  current ORS workload, so this isolates the largest expected win before batching later stages.
+
+Safety / quality invariants
+---------------------------
+- Existing Ren'Py protection, boundary-token salvage, semantic risk analysis, Aya repair,
+  Qwen3 selector and fidelity gate are unchanged after base output is received.
+- Entries may not be merged or continued into one another.
+- Explicit/slang intensity is still requested without censorship/euphemism.
+- Invalid batch structure fails closed into single-unit translation.
+
+Container evidence
+------------------
+- compileall: passed for src/tests/scripts in the reconstructed working tree.
+- targeted pytest: 53/53 passed (test_local_models.py + test_pipeline.py).
+- Full reconstructed-tree pytest reached 274 passing tests with one unrelated pre-existing
+  translate-estimate expectation mismatch in the old baseline fixture. The user's Windows
+  scripts/verify.py remains the authoritative whole-repo gate because the user's current repo
+  already contains fixes not represented in that old reconstructed baseline.
+- Ruff/mypy could not be executed in this offline container because the required Python 3.12
+  uv toolchain was not cached. Run scripts/verify.py on Windows before the benchmark.
+
+Recommended first measurement
+-----------------------------
+Use the same deterministic 10 units with:
+  --hybrid-batch-size 10
+  --parallel-workers 1
+  --llm-batch-size 5
+
+Compare against the previous baseline:
+  30.839 s / 19.46 units per minute
+
+Expected audit for 10 provider-bound units is roughly two base batch calls when all ten reach
+TranslateGemma. Exact counts can be lower when a unit is passthrough/cache/existing.
