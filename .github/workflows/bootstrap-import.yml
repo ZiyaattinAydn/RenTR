@@ -24,7 +24,9 @@ jobs:
           base64 -d /tmp/rentr.tar.xz.b64 > /tmp/rentr.tar.xz
           tar -xJf /tmp/rentr.tar.xz -C .
           rm -rf .bootstrap
-          rm -f .github/workflows/bootstrap-import.yml
+          # GITHUB_TOKEN cannot create/update workflow files via git push.
+          # Keep this bootstrap workflow unchanged and import ci.yml separately later.
+          rm -f .github/workflows/ci.yml
       - name: Commit imported project
         shell: bash
         run: |
